@@ -45,15 +45,15 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 * companyId has 63 unique values, can not easily visualize
 * The rest of the categorical variables, jobType, degree, major and industry have a small amount of unique values and can visualize
 * The minimum of salary is 0, need to check
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img1.png" width="250">
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img2.png" width="500">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img1.png" width="500">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img2.png" width="900">
 
 ## 2.2 check salary = 0 situation
 * The 0 salary has valid fields in other columns, so it does not look like it is an unpaid position
 * There are only a small amount of them (n = 5)
 * Remove salary = 0 rows
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img3.png" width="250">
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img4.png" width="250">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img3.png" width="900">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img4.png" width="500">
 
 ## 2.3 plot salary
 * There are some outliers above the upper bound
@@ -64,7 +64,7 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 * Salaries that are above the upper bounds have the job titles as 'CEO', 'CFO', 'CTO', 'VICE_PRESIDENT', 'SENIOR', 'MANAGER', which are not surprising. But it also has the job title 'JUNIOR'.
 * Further examined the rows with salary above the upper bound and job title being 'JUNIOR', the degree field are all advanced degree, and the industry are all oil/web/finance. So they make sense
 * Decide to keep the outliers.
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img12.png" width="500">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img12.png" width="400">
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img13.png" width="900">
 
 ## 2.5 plot each feature in relation to salary
