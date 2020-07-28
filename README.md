@@ -108,9 +108,131 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img14.png" width="900">
 
 ## 3. DEVELOP
-### 3.1 preprocessing
+### 3.1 preprocessing by scripts in modules/helpers.py
 * combine the training features with salary
-* drop duplicated jobId
+* drop rows with duplicated jobId
 * for both the training and test sets, convert the following variables to category 'companyId', 'jobType', 'degree', 'major', 'industry'
 * remove the rows in training when salary = 0
+* transform categorical variables to be the mean salary of each category and use them as part of the feature group: feature_transform
+* encode categorical variables and use them as part of the feature group: feature_encode
 
+### 3.2 develop the model
+* Establish the metrics, will use Mean Square Error (MSE) as the metrics to determine prediction accuracy
+* Test the baseline prediction, tried using the following transformed categorical columns as the prediction: industry, major, degree, jobType. JobType generated the smallest MSE = 964.1529
+<table>
+  <tr>
+    <th>baseline models</th>
+    <th>MSE</th>
+  </tr>
+  <tr>
+    <td>mean salary for each industry</td>
+    <td>1367.5539</td>
+  </tr>
+  <tr>
+    <td>mean salary for each major</td>
+    <td>1284.3599</td>
+  </tr>
+  <tr>
+    <td>mean salary for each degree</td>
+    <td>1257.9450</td>
+  </tr>
+    <tr>
+    <td>mean salary for each jobType</td>
+    <td>964.1529</td>
+  </tr>
+</table>
+
+* Several Machine Learning Models are tried with different feature combinations
+* note: transformed means categorical features transformed to be the mean salary of each category.
+* note: encoded means categorical features were coded with arbitary numeric numbers.
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img18.png" width="900">
+* note: also included an option of whether to use scaler (normalize all the numeric variables).
+
+* Observations:
+* Different models generated similar MSE, except linear regression did really poorly with encoded features.
+* The model with the lowest MSE is GradientBoosting with transformed features and scaled.
+<table>
+  <tr>
+    <th>Features</th>
+    <th>ML models</th>
+    <th>MSE</th>
+  </tr>
+  <tr>
+    <th>Numeric + transformed categorical not scaled</th>
+    <td>Linear Regression</td>
+    <td>399.7641</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>Random Forest</td>
+    <td>365.8091</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>GradientBoosting</td>
+    <td>364.1131</td>
+  </tr>
+  <tr>
+    <th>Numeric + transformed categorical scaled</th>
+    <td>Linear Regression</td>
+    <td>399.7641</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>Random Forest</td>
+    <td>365.7466</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>GradientBoosting</td>
+    <td>364.1131</td>
+  </tr>
+  <tr>
+    <th>Numeric + encoded categorical not scaled</th>
+    <td>Linear Regression</td>
+    <td>925.0988</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>Random Forest</td>
+    <td>372.4568</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>GradientBoosting</td>
+    <td>379.0314</td>
+  </tr>
+  <tr>
+    <th>Numeric + encoded categorical scaled</th>
+    <td>Linear Regression</td>
+    <td>925.0988</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>Random Forest</td>
+    <td>372.5084</td>
+  </tr>
+  <tr>
+    <th></th>
+    <td>GradientBoosting</td>
+    <td>379.0315</td>
+  </tr>
+</table>
+
+### 3.3 choose the best model and buid pipeline
+* GradientBoosting with transformed and scaled features provided the best results (lowest MSE)
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img15.png" width="900">
+
+
+### 3.4 Train the model on the whole dataset
+
+## 4. DEPLOY
+### Apply the model on the test data
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img16.png" width="900">
+
+### Feature importance
+* jobType_transformed has the greatest contribution. It is consistent with our baseline analysis where using the mean average for each jobType gave us the best baseline results (compared to using degree, major and industry)
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img17.png" width="900">
+
+### Improve the model
+* The model can be improved by removing some colinearity in the data for linear regression

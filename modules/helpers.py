@@ -87,16 +87,18 @@ def normalize(df, colname):
 
 #scale the numeric columns
 from sklearn.preprocessing import StandardScaler
-def apply_scaler(train, test):
+def apply_scaler(train, test, target):
     scale = StandardScaler()
     train_scaled = train.copy()
     test_scaled = test.copy()
-    colnames = list(train_scaled.select_dtypes(include=['float64','int64']).columns)
+    colnames = train_scaled.select_dtypes(include=['float64','int64']).columns.to_list()
+    colnames.remove(target)
     print('\nThe following columns are scaled:\n')
     print(colnames)
-    train_scaled[colnames] =  scale.fit_transform(train_scaled[colnames])
+    scale.fit(train_scaled[colnames])
+    train_scaled[colnames] =  scale.transform(train_scaled[colnames])
     test_scaled[colnames] =  scale.transform(test_scaled[colnames])
-    return [train_scaled, test_scaled]
+    return train_scaled, test_scaled
 
 #if value_counts < 20 or if the variable is not numeric, print the value_count table
 #if the variable is numeric, make density plot for frequency, and lineplot for interaction with the target variable
@@ -131,17 +133,18 @@ def study_outliers(df, col):
     upper = stat['75%'] + 1.5 * IQR
     lower = stat['25%'] - 1.5 * IQR
     print('The upper and lower bounds for variable {} are {} and {}'.format(col, upper, lower))
-    return [lower, upper]
+    return lower, upper
 
-def label_encode(df, col, target): 
-    ''' Encodes the categories of the column based on the mean value of the salary of every category
-    in order to replace the label of the category '''
-    cat_mean = {}
-    cats = df[col].cat.categories.tolist()
-    for cat in cats:
-        cat_mean[cat] = df[df[col] == cat][target].mean()
-    df[col] = df[col].map(cat_mean)
-    return df[col]
+#transform a variable based on the average of the target variable of each value
+#for example, transfor each industry into the averaged salary of each industry
+def transform_categorical(df, col, target, training_df): 
+    category_mean = {}
+    value_list = df[col].cat.categories.tolist()
+    for value in value_list:
+        category_mean[value] = training_df[training_df[col] == value][target].mean()
+    df[col+'_transformed'] = df[col].map(category_mean)
+    df[col+'_transformed'] = df[col+'_transformed'].astype('int64')
+    return df
 
 def convert_to_category(df, col):
     df[col] = df[col].astype('category')
@@ -151,44 +154,83 @@ def drop_duplicates(df, col):
     df = df.drop_duplicates(subset = col)
     return df
 
-def encode_category(df, target):
-    df_copy = df[:]
-    for col in df_copy.columns:
-        if df_copy[col].dtype.name == 'category':
-            df_copy[col]=label_encode(df_copy, col, target)
-            df_copy[col] = df_copy[col].astype('int64')
-    return df_copy
+#get the variable list that will need convert to category and then encode
+def salary_get_variable_list():
+    variable_list = ['companyId', 'jobType', 'degree', 'major', 'industry']
+    return variable_list
 
-#chain the whole preprocess for the training data
-def preprocess_training(df):
-    df = drop_duplicates(df,'jobId')
+#make sure training and test has the same categorical variables
+def encode_categorical(training, test):
+    from sklearn import preprocessing
+    cols = training.select_dtypes(include=['category']).columns.to_list()
+    for col in cols:
+        le = preprocessing.LabelEncoder()
+        le.fit(training[col])
+        training[col+'_encoded'] = le.transform(training[col])
+        test[col+'_encoded'] = le.transform(test[col])
+    return training, test
+
+def salary_preprocess():
+    #define constants
+    variable_list = salary_get_variable_list()
+    target = 'salary'
     
-    #convert to categorial variables
-    df = convert_to_category(df, 'companyId')    
-    df = convert_to_category(df, 'jobType')
-    df = convert_to_category(df, 'degree')
-    df = convert_to_category(df, 'major')
-    df = convert_to_category(df, 'industry')
+    #read the data and merge feature and salary for the training data
+    features = pd.read_csv('data/train_features.csv')
+    salaries = pd.read_csv('data/train_salaries.csv')
+    test = pd.read_csv('data/test_features.csv')
+    training = pd.merge(features,salaries, how = 'inner', on = 'jobId')
+
+    #remove duplicates
+    training = drop_duplicates(training,'jobId')
+    test = drop_duplicates(test,'jobId')
+
+    #remove salary = 0 in the training set
+    training = training.drop(training[training[target]==0].index)
+
+    #convert object to categorial variables
+    #and transform them based on mean target (salary)
+    for variable in variable_list:
+        training = convert_to_category(training, variable)
+        training = transform_categorical(training, variable, target, training)
+        test = convert_to_category(test, variable)
+        test = transform_categorical(test, variable, target, training)
+
+    #encode categorical variables to dummies
+    training, test = encode_categorical(training, test)
     
-    #remove salary = 0
-    df = df.drop(training[df['salary']==0].index)
+    #save scaler for later
     
-    #encode categorical variables
-    df_copy = encode_category(df, 'salary)
+    #print results on the screen
+    training.info()
+    training.head()
+    test.info()
+    test.head()
+    return training, test
 
-    return df_copy
-                              
-def preprocess_test(df):
-    df = drop_duplicates(df,'jobId')
+#Cross validates the model for 20% (cv=5) of the training set
+from sklearn.model_selection import cross_val_score
+def cross_val_model(model, feature_df, target, n_procs, mean_mse, cv_std):
+    neg_mse = cross_val_score(model, feature_df, target, cv = 5, n_jobs = n_procs, 
+                              scoring = 'neg_mean_squared_error')
+    mean_mse[model] = -1.0 * np.mean(neg_mse)
+    cv_std[model] = np.std(neg_mse)
+    
+#print a short summary
+def print_summary(model, mean_mse, cv_std):
+    print('\nmodel:\n', model)
+    print('Average MSE:\n', mean_mse[model])
+    print('Standard deviation during cross validation:\n', cv_std[model])
 
-    #convert to categorial variables
-    df = convert_to_category(df, 'companyId')    
-    df = convert_to_category(df, 'jobType')
-    df = convert_to_category(df, 'degree')
-    df = convert_to_category(df, 'major')
-    df = convert_to_category(df, 'industry')
-        
-    #encode categorical variables
-    df_copy = encode_category(df, 'salary)
-
-    return df_copy
+#feature importance
+def get_model_feature_importances(model, feature_df):
+    if hasattr(model, 'feature_importances_'):
+        importances = model.feature_importances_
+    else:
+        importances = [0] * len(feature_df.columns)
+    
+    feature_importances = pd.DataFrame({'feature': feature_df.columns, 'importance': importances})
+    feature_importances.sort_values(by = 'importance', ascending = False, inplace = True)
+    ''' set the index to 'feature' '''
+    feature_importances.set_index('feature', inplace = True, drop = True)
+    return feature_importances
