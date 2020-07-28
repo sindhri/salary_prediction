@@ -13,13 +13,9 @@ Predict salary using machine learning (Linear regression, Random Forest, and Gra
     <td>salary_EDA.ipynb</td>
     <td>EDA (Exploratory Data Analysis)</td>
   </tr>
-  <tr>
-    <td>salary_preprocessing.ipynb</td>
-    <td>Data preprocess using scripts in modules/helpers</td>
-  </tr>
     <tr>
     <td>salary_model.ipynb</td>
-    <td>Machine Learning model building and turning</td>
+    <td>Machine Learning model building and tuning</td>
   </tr>
 </table>
 <br>
