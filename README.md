@@ -103,8 +103,8 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 * Salary is negatively related with milesFromMetropolis
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img14.png" width="900">
 
-## 3. DEVELOP
-### 3.1 preprocessing by scripts in modules/helpers.py
+# 3. DEVELOP
+## 3.1 preprocessing by scripts in modules/helpers.py
 * combine the training features with salary
 * drop rows with duplicated jobId
 * for both the training and test sets, convert the following variables to category 'companyId', 'jobType', 'degree', 'major', 'industry'
@@ -112,7 +112,7 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 * transform categorical variables to be the mean salary of each category and use them as part of the feature group: feature_transform
 * encode categorical variables and use them as part of the feature group: feature_encode
 
-### 3.2 develop the model
+## 3.2 test baseline models
 * Establish the metrics, will use Mean Square Error (MSE) as the metrics to determine prediction accuracy
 * Test the baseline prediction, tried using the following transformed categorical columns as the prediction: industry, major, degree, jobType. JobType generated the smallest MSE = 964.1529
 <table>
@@ -138,6 +138,7 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
   </tr>
 </table>
 
+## 3.3 test machine learning models
 * Several Machine Learning Models are tried with different feature combinations
 * note: transformed means categorical features transformed to be the mean salary of each category.
 * note: encoded means categorical features were coded with arbitary numeric numbers.
@@ -217,21 +218,21 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
   </tr>
 </table>
 
-### 3.3 choose the best model and buid pipeline
+## 3.4 Choose the best model and buid pipeline
 * GradientBoosting with transformed and scaled features provided the best results (lowest MSE)
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img15.png" width="900">
 
 
-### 3.4 Train the model on the whole dataset
+## 3.5 Train the model on the whole dataset
 
-## 4. DEPLOY
-### Apply the model on the test data
+# 4. DEPLOY
+## 4.1 Apply the model on the test data
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img16.png" width="900">
 
-### Feature importance
+## 4.2 Feature importance
 * jobType_transformed has the greatest contribution. It is consistent with our baseline analysis where using the mean average for each jobType gave us the best baseline results (compared to using degree, major and industry)
 * other important features are yearsExperience, milesFromMetropolis
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img17.png" width="900">
 
-### Improve the model
+## 4.3 Improve the model
 * The model can be improved by removing some colinearity in the data for linear regression
