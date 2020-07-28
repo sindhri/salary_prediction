@@ -1,5 +1,5 @@
 # Salary Prediction Summary
-Predict salary using machine learning (regression, random forest)
+Predict salary using machine learning (Linear regression, Random Forest, and Gradient Boost)
 <table>
   <tr>
     <th>Files</th>
