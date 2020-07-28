@@ -145,12 +145,14 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 * Several Machine Learning Models are tried with different feature combinations
 * note: transformed means categorical features transformed to be the mean salary of each category.
 * note: encoded means categorical features were coded with arbitary numeric numbers.
-<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img18.png" width="900">
+<img src="https://github.com/sindhri/salary_prediction/blob/master/images/img18.png" width="900">  
 * note: also included an option of whether to use scaler (normalize all the numeric variables).
 
 * Observations:
 * Different models generated similar MSE, except linear regression did really poorly with encoded features.
 * The model with the lowest MSE is GradientBoosting with transformed features and scaled.
+* Whether to scale the numeric variables makes very little or no difference in the MSE.
+
 <table>
   <tr>
     <th>Features</th>
@@ -232,6 +234,7 @@ We use a metric MSE (Mean Squared Error) to assess the prediction accuracy. The 
 
 ### Feature importance
 * jobType_transformed has the greatest contribution. It is consistent with our baseline analysis where using the mean average for each jobType gave us the best baseline results (compared to using degree, major and industry)
+* other important features are yearsExperience, milesFromMetropolis
 <img src="https://github.com/sindhri/salary_prediction/blob/master/images/img17.png" width="900">
 
 ### Improve the model
